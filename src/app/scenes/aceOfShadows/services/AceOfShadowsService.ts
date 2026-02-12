@@ -16,7 +16,6 @@ export class AceOfShadowsService {
   private poses: CardPose[] = [];
 
   private viewportWidth = 0;
-  private viewportHeight = 0;
   private cardWidth: number = ACE_OF_SHADOWS_CONFIG.layout.cardWidthInitial;
   private cardHeight: number = ACE_OF_SHADOWS_CONFIG.layout.cardHeightInitial;
 
@@ -46,9 +45,8 @@ export class AceOfShadowsService {
     this.layoutStacks();
   }
 
-  setViewport(width: number, height: number) {
+  setViewport(width: number) {
     this.viewportWidth = width;
-    this.viewportHeight = height;
     this.cardWidth = Math.max(
       ACE_OF_SHADOWS_CONFIG.layout.minCardWidth,
       Math.min(
@@ -104,8 +102,8 @@ export class AceOfShadowsService {
 
     const sourceDepth = sourceStack.length;
     const targetDepth = this.stacks[target].length + this.pendingIncoming[target];
-    const from = this.stackCardPosition(source, sourceDepth, sourceDepth + 1);
-    const to = this.stackCardPosition(target, targetDepth, targetDepth + 1);
+    const from = this.stackCardPosition(source, sourceDepth);
+    const to = this.stackCardPosition(target, targetDepth);
 
     this.pendingIncoming[target] += 1;
 
@@ -162,13 +160,8 @@ export class AceOfShadowsService {
     }
   }
 
-  private stackCardPosition(
-    stackIndex: number,
-    depth: number,
-    stackDepthOverride?: number,
-  ): { x: number; y: number } {
+  private stackCardPosition(stackIndex: number, depth: number): { x: number; y: number } {
     const safeWidth = Math.max(this.viewportWidth, ACE_OF_SHADOWS_CONFIG.layout.minViewportSize);
-    const safeHeight = Math.max(this.viewportHeight, ACE_OF_SHADOWS_CONFIG.layout.minViewportSize);
 
     const left = Math.max(
       ACE_OF_SHADOWS_CONFIG.layout.minHorizontalPadding,
@@ -180,14 +173,8 @@ export class AceOfShadowsService {
       : 0;
     const x = left + step * stackIndex;
 
-    const stackDepth = Math.max(
-      1,
-      stackDepthOverride
-        ?? this.stacks[stackIndex].length + this.pendingIncoming[stackIndex],
-    );
-    const deckOffset = ((stackDepth - 1) * AceOfShadowsService.STACK_OFFSET_Y) / 2;
-    const baseY = safeHeight * ACE_OF_SHADOWS_CONFIG.layout.stackCenterYFactor + deckOffset;
-    const y = baseY - depth * AceOfShadowsService.STACK_OFFSET_Y;
+    const baseY = ACE_OF_SHADOWS_CONFIG.layout.stackTopPadding + this.cardHeight / 2;
+    const y = baseY + depth * AceOfShadowsService.STACK_OFFSET_Y;
 
     return { x, y };
   }

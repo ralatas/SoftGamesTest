@@ -25,7 +25,7 @@ export const ACE_OF_SHADOWS_CONFIG = {
     minViewportSize: 320,
     minHorizontalPadding: 50,
     sidePaddingCardWidthFactor: 0.65,
-    stackCenterYFactor: 0.5,
+    stackTopPadding: 120,
     movingCardZBase: 100000,
     stackZStride: 1000,
   },

@@ -47,6 +47,15 @@ export class MagicWordsScene implements IScene {
   }
 
   onResize(width: number, height: number) {
+    const compact = width <= MAGIC_WORDS_CONFIG.scene.compactBreakpoint;
+    this.dialoguePanel.setCompactMode(compact);
+    this.title.style.fontSize = compact
+      ? MAGIC_WORDS_CONFIG.scene.titleFontSizeCompact
+      : MAGIC_WORDS_CONFIG.scene.titleFontSize;
+    this.status.style.fontSize = compact
+      ? MAGIC_WORDS_CONFIG.scene.statusFontSizeCompact
+      : MAGIC_WORDS_CONFIG.scene.statusFontSize;
+
     this.title.anchor.set(MAGIC_WORDS_CONFIG.scene.titleAnchorX, 0);
     this.title.position.set(width / 2, MAGIC_WORDS_CONFIG.scene.titleTop);
     this.back.position.set(

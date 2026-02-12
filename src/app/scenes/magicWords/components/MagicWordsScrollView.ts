@@ -1,4 +1,4 @@
-import { Container, Graphics } from "pixi.js";
+import { Container, Graphics, Rectangle } from "pixi.js";
 import { ScrollBar } from "../../../../ui/ScrollBar";
 import { MAGIC_WORDS_CONFIG } from "../MagicWordsConfig";
 
@@ -14,6 +14,9 @@ export class MagicWordsScrollView extends Container {
   private contentHeight = 0;
   private maxScroll = 0;
   private scrollOffset = 0;
+  private dragging = false;
+  private dragStartY = 0;
+  private dragStartOffset = 0;
 
   constructor() {
     super();
@@ -27,6 +30,12 @@ export class MagicWordsScrollView extends Container {
     });
 
     this.dataContainer.mask = this.contentMask;
+    this.dataContainer.eventMode = "static";
+    this.dataContainer.on("pointerdown", this.onPointerDown);
+    this.dataContainer.on("pointermove", this.onPointerMove);
+    this.dataContainer.on("pointerup", this.onPointerUp);
+    this.dataContainer.on("pointerupoutside", this.onPointerUp);
+    this.dataContainer.on("pointercancel", this.onPointerUp);
     this.dataContainer.addChild(this.contentRoot);
     this.addChild(this.contentMask, this.dataContainer, this.scrollBar);
   }
@@ -35,6 +44,7 @@ export class MagicWordsScrollView extends Container {
     this.position.set(x, y);
     this.viewportWidth = Math.max(MAGIC_WORDS_CONFIG.scroll.minViewport, width);
     this.viewportHeight = Math.max(MAGIC_WORDS_CONFIG.scroll.minViewport, height);
+    this.dataContainer.hitArea = new Rectangle(0, 0, this.viewportWidth, this.viewportHeight);
 
     this.contentMask.clear();
     this.contentMask.roundRect(
@@ -79,6 +89,29 @@ export class MagicWordsScrollView extends Container {
     this.scrollOffset = Math.max(0, Math.min(this.maxScroll, this.scrollOffset + deltaY));
     this.applyScroll();
   }
+
+  private onPointerDown = (event: import("pixi.js").FederatedPointerEvent) => {
+    if (this.maxScroll <= 0) {
+      return;
+    }
+    this.dragging = true;
+    this.dragStartY = event.global.y;
+    this.dragStartOffset = this.scrollOffset;
+  };
+
+  private onPointerMove = (event: import("pixi.js").FederatedPointerEvent) => {
+    if (!this.dragging || this.maxScroll <= 0) {
+      return;
+    }
+
+    const deltaY = event.global.y - this.dragStartY;
+    this.scrollOffset = Math.max(0, Math.min(this.maxScroll, this.dragStartOffset - deltaY));
+    this.applyScroll();
+  };
+
+  private onPointerUp = () => {
+    this.dragging = false;
+  };
 
   private updateScrollMetrics(stickToBottom: boolean) {
     this.maxScroll = Math.max(0, this.contentHeight - this.viewportHeight);

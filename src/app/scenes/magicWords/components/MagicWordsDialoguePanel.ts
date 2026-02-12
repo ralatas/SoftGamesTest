@@ -6,6 +6,8 @@ import { MAGIC_WORDS_CONFIG } from "../MagicWordsConfig";
 
 export class MagicWordsDialoguePanel extends Container {
   private scrollView = new MagicWordsScrollView();
+  private resources?: MagicWordsResources;
+  private compactMode = false;
 
   private nameStyle = new TextStyle({
     fill: MAGIC_WORDS_CONFIG.message.nameColor,
@@ -27,11 +29,35 @@ export class MagicWordsDialoguePanel extends Container {
     this.addChild(this.scrollView);
   }
 
+  setCompactMode(compact: boolean) {
+    if (this.compactMode === compact) {
+      return;
+    }
+    this.compactMode = compact;
+    this.nameStyle.fontSize = compact
+      ? MAGIC_WORDS_CONFIG.message.nameFontSizeCompact
+      : MAGIC_WORDS_CONFIG.message.nameFontSize;
+    this.textStyle.fontSize = compact
+      ? MAGIC_WORDS_CONFIG.message.textFontSizeCompact
+      : MAGIC_WORDS_CONFIG.message.textFontSize;
+    this.fallbackEmojiStyle.fontSize = compact
+      ? MAGIC_WORDS_CONFIG.message.fallbackEmojiFontSizeCompact
+      : MAGIC_WORDS_CONFIG.message.fallbackEmojiFontSize;
+
+    if (this.resources) {
+      this.renderDialogue(this.resources);
+    }
+  }
+
   setLayout(x: number, y: number, width: number, height: number) {
     this.scrollView.setLayout(x, y, width, height);
+    if (this.resources) {
+      this.renderDialogue(this.resources);
+    }
   }
 
   renderDialogue(resources: MagicWordsResources) {
+    this.resources = resources;
     this.scrollView.clearContent();
 
     const avatarByName = new Map<string, { position: "left" | "right" }>();

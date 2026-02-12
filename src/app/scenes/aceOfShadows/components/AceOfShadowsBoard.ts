@@ -18,8 +18,8 @@ export class AceOfShadowsBoard extends Container {
     }
   }
 
-  resize(width: number, height: number) {
-    this.service.setViewport(width, height);
+  resize(width: number, _height: number) {
+    this.service.setViewport(width);
     this.syncFromService();
   }
 
