@@ -29,7 +29,7 @@ export class AceOfShadowsBoard extends Container {
   }
 
   destroyBoard() {
-    this.cards.forEach((card) => card.destroy());
+    this.cards.forEach((card) => card.destroy({ children: true }));
     this.cards = [];
   }
 

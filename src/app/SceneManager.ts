@@ -40,6 +40,15 @@ export class SceneManager {
     this.setScene(new PhoenixFlameScene({ onBack: () => this.goToMenu() }));
   }
 
+  destroy() {
+    window.removeEventListener("resize", this.handleResize);
+    if (this.current) {
+      this.root.removeChild(this.current.view);
+      this.current.destroy();
+      this.current = undefined;
+    }
+  }
+
   private setScene(scene: IScene) {
     if (this.current) {
       this.root.removeChild(this.current.view);

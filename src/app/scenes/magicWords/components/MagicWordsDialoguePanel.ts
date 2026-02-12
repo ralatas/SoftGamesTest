@@ -8,18 +8,18 @@ export class MagicWordsDialoguePanel extends Container {
   private scrollView = new MagicWordsScrollView();
 
   private nameStyle = new TextStyle({
-    fill: "#ffffff",
-    fontSize: MAGIC_WORDS_CONFIG.panel.nameFontSize,
+    fill: MAGIC_WORDS_CONFIG.message.nameColor,
+    fontSize: MAGIC_WORDS_CONFIG.message.nameFontSize,
     fontWeight: "700",
   });
   private textStyle = new TextStyle({
-    fill: "#d8deff",
-    fontSize: MAGIC_WORDS_CONFIG.panel.textFontSize,
+    fill: MAGIC_WORDS_CONFIG.message.textColor,
+    fontSize: MAGIC_WORDS_CONFIG.message.textFontSize,
     wordWrap: false,
   });
   private fallbackEmojiStyle = new TextStyle({
-    fill: "#ffd36b",
-    fontSize: MAGIC_WORDS_CONFIG.panel.fallbackEmojiFontSize,
+    fill: MAGIC_WORDS_CONFIG.message.fallbackEmojiColor,
+    fontSize: MAGIC_WORDS_CONFIG.message.fallbackEmojiFontSize,
   });
 
   constructor() {
@@ -40,9 +40,9 @@ export class MagicWordsDialoguePanel extends Container {
       avatarByName.set(avatar.name, { position: avatar.position });
     }
 
-    const avatarSize = MAGIC_WORDS_CONFIG.panel.avatarSize;
+    const avatarSize = MAGIC_WORDS_CONFIG.message.avatarSize;
     const outerPad = MAGIC_WORDS_CONFIG.panel.outerPad;
-    const bubblePad = MAGIC_WORDS_CONFIG.panel.bubblePad;
+    const bubblePad = MAGIC_WORDS_CONFIG.message.bubblePad;
     const viewportWidth = this.scrollView.getViewportWidth();
     const bubbleMaxWidth = Math.min(
       MAGIC_WORDS_CONFIG.panel.bubbleMaxWidth,

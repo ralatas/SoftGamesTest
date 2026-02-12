@@ -59,7 +59,10 @@ export class MagicWordsScrollView extends Container {
   }
 
   clearContent() {
-    this.contentRoot.removeChildren();
+    const removed = this.contentRoot.removeChildren();
+    for (let i = 0; i < removed.length; i += 1) {
+      removed[i].destroy({ children: true });
+    }
     this.contentHeight = 0;
     this.maxScroll = 0;
     this.scrollOffset = 0;

@@ -2,8 +2,14 @@ import { Container, Graphics, Sprite, Texture } from "pixi.js";
 import { PhoenixFlameService } from "../services/PhoenixFlameService";
 
 export class PhoenixFlameField extends Container {
+  private static readonly GLOW_RADII = [56, 32, 18] as const;
+  private static readonly GLOW_Y_OFFSETS = [12, 2, -8] as const;
+  private static readonly GLOW_COLORS = [0xff3b0a, 0xff7a1c, 0xffc94a] as const;
+  private static readonly GLOW_ALPHAS = [0.22, 0.26, 0.32] as const;
+
   private flameLayer = new Container();
-  private coreGlow = new Graphics();
+  private coreGlow = new Container();
+  private glowRings: Graphics[] = [];
   private particleSprites: Sprite[] = [];
   private service: PhoenixFlameService;
 
@@ -20,6 +26,17 @@ export class PhoenixFlameField extends Container {
       sprite.visible = false;
       this.particleSprites.push(sprite);
       this.flameLayer.addChild(sprite);
+    }
+
+    for (let i = 0; i < PhoenixFlameField.GLOW_RADII.length; i += 1) {
+      const glow = new Graphics();
+      glow.circle(0, 0, PhoenixFlameField.GLOW_RADII[i]);
+      glow.fill({
+        color: PhoenixFlameField.GLOW_COLORS[i],
+        alpha: PhoenixFlameField.GLOW_ALPHAS[i],
+      });
+      this.glowRings.push(glow);
+      this.coreGlow.addChild(glow);
     }
 
     this.addChild(this.coreGlow, this.flameLayer);
@@ -60,7 +77,9 @@ export class PhoenixFlameField extends Container {
   destroyField() {
     this.particleSprites.forEach((sprite) => sprite.destroy());
     this.particleSprites = [];
-    this.coreGlow.destroy();
+    this.glowRings.forEach((glow) => glow.destroy());
+    this.glowRings = [];
+    this.coreGlow.destroy({ children: true });
   }
 
   private drawCoreGlow() {
@@ -68,14 +87,10 @@ export class PhoenixFlameField extends Container {
     const emitterY = this.service.getEmitterY();
     const pulse = this.service.getPulse();
 
-    this.coreGlow.clear();
-    this.coreGlow.circle(emitterX, emitterY + 12, 56 * pulse);
-    this.coreGlow.fill({ color: 0xff3b0a, alpha: 0.22 });
-
-    this.coreGlow.circle(emitterX, emitterY + 2, 32 * pulse);
-    this.coreGlow.fill({ color: 0xff7a1c, alpha: 0.26 });
-
-    this.coreGlow.circle(emitterX, emitterY - 8, 18 * pulse);
-    this.coreGlow.fill({ color: 0xffc94a, alpha: 0.32 });
+    for (let i = 0; i < this.glowRings.length; i += 1) {
+      const glow = this.glowRings[i];
+      glow.position.set(emitterX, emitterY + PhoenixFlameField.GLOW_Y_OFFSETS[i]);
+      glow.scale.set(pulse);
+    }
   }
 }

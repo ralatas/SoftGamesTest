@@ -1,19 +1,61 @@
-import { Sprite, Texture } from "pixi.js";
+import { Container, Sprite, Text, TextStyle, Texture } from "pixi.js";
 import type { CardPose } from "../AceOfShadows.types";
 import { ACE_OF_SHADOWS_CONFIG } from "../AceOfShadowsConfig";
 
-export class AceCard extends Sprite {
+export class AceCard extends Container {
+  private face: Sprite;
+  private topRank: Text;
+  private bottomRank: Text;
+
   constructor(index: number) {
-    super(Texture.WHITE);
-    this.anchor.set(0.5);
-    this.tint = AceCard.cardTint(index);
+    super();
+    this.face = new Sprite(Texture.WHITE);
+    this.face.anchor.set(0.5);
+    this.face.tint = AceCard.cardTint(index);
+
+    const rank = AceCard.cardRank(index);
+    const style = new TextStyle({
+      fill: ACE_OF_SHADOWS_CONFIG.cardLabel.fill,
+      fontSize: ACE_OF_SHADOWS_CONFIG.cardLabel.fontSize,
+      fontWeight: ACE_OF_SHADOWS_CONFIG.cardLabel.fontWeight,
+      stroke: {
+        color: ACE_OF_SHADOWS_CONFIG.cardLabel.strokeColor,
+        width: ACE_OF_SHADOWS_CONFIG.cardLabel.strokeWidth,
+      },
+    });
+
+    this.topRank = new Text({ text: rank, style });
+    this.bottomRank = new Text({ text: rank, style });
+    this.topRank.anchor.set(0, 0);
+    this.bottomRank.anchor.set(0, 0);
+    this.bottomRank.rotation = Math.PI;
+    this.addChild(this.face, this.topRank, this.bottomRank);
   }
 
   applyPose(pose: CardPose, width: number, height: number) {
-    this.width = width;
-    this.height = height;
+    this.face.width = width;
+    this.face.height = height;
     this.position.set(pose.x, pose.y);
     this.zIndex = pose.z;
+
+    const scale = Math.max(
+      ACE_OF_SHADOWS_CONFIG.cardLabel.minScale,
+      width / ACE_OF_SHADOWS_CONFIG.cardLabel.baseWidth,
+    );
+    const pad = Math.max(
+      ACE_OF_SHADOWS_CONFIG.cardLabel.minPadding,
+      Math.floor(width * ACE_OF_SHADOWS_CONFIG.cardLabel.paddingFactor),
+    );
+
+    this.topRank.scale.set(scale);
+    this.bottomRank.scale.set(scale);
+    this.topRank.position.set(-width / 2 + pad, -height / 2 + pad);
+    this.bottomRank.position.set(width / 2 - pad, height / 2 - pad);
+  }
+
+  private static cardRank(index: number): string {
+    const { ranks } = ACE_OF_SHADOWS_CONFIG.cardLabel;
+    return ranks[index % ranks.length];
   }
 
   private static cardTint(index: number): number {

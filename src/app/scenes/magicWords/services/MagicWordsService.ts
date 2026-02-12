@@ -23,19 +23,32 @@ export class MagicWordsService {
     const emojiTexturesByName = new Map<string, Texture>();
     const avatarTexturesByName = new Map<string, Texture>();
 
-    for (let i = 0; i < payload.emojis.length; i += 1) {
-      const emoji = payload.emojis[i];
-      const texture = await this.loadTexture(emoji.url);
-      if (texture) {
-        emojiTexturesByName.set(emoji.name, texture);
+    const [emojiEntries, avatarEntries] = await Promise.all([
+      Promise.all(
+        payload.emojis.map(async (emoji) => {
+          const texture = await this.loadTexture(emoji.url);
+          return { name: emoji.name, texture };
+        }),
+      ),
+      Promise.all(
+        payload.avatars.map(async (avatar) => {
+          const texture = await this.loadTexture(avatar.url);
+          return { name: avatar.name, texture };
+        }),
+      ),
+    ]);
+
+    for (let i = 0; i < emojiEntries.length; i += 1) {
+      const entry = emojiEntries[i];
+      if (entry.texture) {
+        emojiTexturesByName.set(entry.name, entry.texture);
       }
     }
 
-    for (let i = 0; i < payload.avatars.length; i += 1) {
-      const avatar = payload.avatars[i];
-      const texture = await this.loadTexture(avatar.url);
-      if (texture) {
-        avatarTexturesByName.set(avatar.name, texture);
+    for (let i = 0; i < avatarEntries.length; i += 1) {
+      const entry = avatarEntries[i];
+      if (entry.texture) {
+        avatarTexturesByName.set(entry.name, entry.texture);
       }
     }
 
@@ -112,6 +125,10 @@ export class MagicWordsService {
     });
 
     MagicWordsService.textureByUrl.set(url, pending);
-    return pending;
+    const texture = await pending;
+    if (!texture) {
+      MagicWordsService.textureByUrl.delete(url);
+    }
+    return texture;
   }
 }

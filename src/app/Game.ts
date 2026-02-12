@@ -7,6 +7,17 @@ export class Game {
 
   private fpsText!: Text;
   private sceneManager!: SceneManager;
+  private fpsUpdateIntervalMs = 250;
+  private fpsElapsedMs = 0;
+
+  private readonly onTick = () => {
+    this.fpsElapsedMs += this.app.ticker.deltaMS;
+    if (this.fpsElapsedMs < this.fpsUpdateIntervalMs) {
+      return;
+    }
+    this.fpsElapsedMs = 0;
+    this.fpsText.text = `FPS: ${this.app.ticker.FPS.toFixed(0)}`;
+  };
 
   async init(mount: HTMLElement) {
     this.app = new Application();
@@ -32,8 +43,12 @@ export class Game {
     this.sceneManager = new SceneManager(this.stageRoot, this.app);
     this.sceneManager.goToMenu();
 
-    this.app.ticker.add(() => {
-      this.fpsText.text = `FPS: ${this.app.ticker.FPS.toFixed(0)}`;
-    });
+    this.app.ticker.add(this.onTick);
+  }
+
+  destroy() {
+    this.app.ticker.remove(this.onTick);
+    this.sceneManager.destroy();
+    this.app.destroy(true, { children: true });
   }
 }

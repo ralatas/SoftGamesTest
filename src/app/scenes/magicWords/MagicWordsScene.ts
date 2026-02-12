@@ -14,19 +14,20 @@ export class MagicWordsScene implements IScene {
   private dialoguePanel: MagicWordsDialoguePanel;
   private service: MagicWordsService;
   private destroyed = false;
+  private contentBounds = { x: 0, y: 0, width: 0, height: 0 };
 
   constructor(deps: { onBack: () => void }) {
     this.title = new Text({
       text: "Magic Words",
       style: new TextStyle({
-        fill: "#ffffff",
+        fill: MAGIC_WORDS_CONFIG.scene.titleColor,
         fontSize: MAGIC_WORDS_CONFIG.scene.titleFontSize,
       }),
     });
     this.status = new Text({
       text: "Loading dialogue...",
       style: new TextStyle({
-        fill: "#9ba6d6",
+        fill: MAGIC_WORDS_CONFIG.scene.statusColor,
         fontSize: MAGIC_WORDS_CONFIG.scene.statusFontSize,
       }),
     });
@@ -66,6 +67,7 @@ export class MagicWordsScene implements IScene {
 
     this.status.position.set(contentX, contentY + MAGIC_WORDS_CONFIG.scene.statusOffsetY);
     this.dialoguePanel.setLayout(contentX, contentY, contentWidth, contentHeight);
+    this.contentBounds = { x: contentX, y: contentY, width: contentWidth, height: contentHeight };
   }
 
   destroy() {
@@ -97,6 +99,15 @@ export class MagicWordsScene implements IScene {
   }
 
   private onWheel = (event: WheelEvent) => {
+    const right = this.contentBounds.x + this.contentBounds.width;
+    const bottom = this.contentBounds.y + this.contentBounds.height;
+    const isInsidePanel = event.clientX >= this.contentBounds.x
+      && event.clientX <= right
+      && event.clientY >= this.contentBounds.y
+      && event.clientY <= bottom;
+    if (!isInsidePanel) {
+      return;
+    }
     this.dialoguePanel.onWheel(event.deltaY);
   };
 }
