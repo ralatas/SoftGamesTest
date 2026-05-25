@@ -1,5 +1,6 @@
 import { Application, Container, Text, TextStyle } from "pixi.js";
 import { SceneManager } from "./SceneManager";
+import { initDevtools } from '@pixi/devtools';
 
 export class Game {
   public app!: Application;
@@ -21,7 +22,12 @@ export class Game {
 
   async init(mount: HTMLElement) {
     this.app = new Application();
-
+    initDevtools({
+      app: this.app,
+      // If you are not using a pixi app, you can pass the renderer and stage directly
+      // renderer: myRenderer,
+      // stage: myStage,
+    });
     await this.app.init({
       background: "#0b0f1a",
       antialias: true,
